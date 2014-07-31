@@ -149,6 +149,20 @@ app.factory('ngTableParams', ['$q', '$log', function ($q, $log) {
             return angular.isDefined(page) ? this.parameters({'page': page}) : params.page;
         };
 
+
+        /**
+         * @ngdoc method
+         * @name ngTable.factory:ngTableParams#pagesOrder
+         * @methodOf ngTable.factory:ngTableParams
+         * @description If parameter pagesOrder not set return current order else set order
+         *
+         * @param {string} page Page number
+         * @returns {Object|Number} Current page or `this`
+         */
+        this.pagesOrder = function (pagesOrder) {
+            return angular.isDefined(pagesOrder) ? this.settings({'pagesOrder': pagesOrder}) : settings.pagesOrder;
+        };
+
         /**
          * @ngdoc method
          * @name ngTable.factory:ngTableParams#total
@@ -294,54 +308,71 @@ app.factory('ngTableParams', ['$q', '$log', function ($q, $log) {
          * @param {boolean} currentPage which page must be active
          * @param {boolean} totalItems  Total quantity of items
          * @param {boolean} pageSize    Quantity of items on page
+         * @param {Array} pagesOrder    Ordered array of page types
          * @returns {Array} Array of pages
          */
         this.generatePagesArray = function (currentPage, totalItems, pageSize) {
+            var pagesOrder = self.pagesOrder();
             var maxBlocks, maxPage, maxPivotPages, minPage, numPages, pages;
             maxBlocks = 11;
             pages = [];
             numPages = Math.ceil(totalItems / pageSize);
             if (numPages > 1) {
-                pages.push({
-                    type: 'prev',
-                    number: Math.max(1, currentPage - 1),
-                    active: currentPage > 1
-                });
-                pages.push({
-                    type: 'first',
-                    number: 1,
-                    active: currentPage > 1
-                });
-                maxPivotPages = Math.round((maxBlocks - 5) / 2);
-                minPage = Math.max(2, currentPage - maxPivotPages);
-                maxPage = Math.min(numPages - 1, currentPage + maxPivotPages * 2 - (currentPage - minPage));
-                minPage = Math.max(2, minPage - (maxPivotPages * 2 - (maxPage - minPage)));
-                var i = minPage;
-                while (i <= maxPage) {
-                    if ((i === minPage && i !== 2) || (i === maxPage && i !== numPages - 1)) {
-                        pages.push({
-                            type: 'more',
-                            active: false
-                        });
-                    } else {
-                        pages.push({
-                            type: 'page',
-                            number: i,
-                            active: currentPage !== i
-                        });
+                pagesOrder.forEach(function (type) {
+                    maxPivotPages = Math.round((maxBlocks - 5) / 2);
+                    minPage = Math.max(2, currentPage - maxPivotPages);
+                    maxPage = Math.min(numPages - 1, currentPage + maxPivotPages * 2 - (currentPage - minPage));
+                    minPage = Math.max(2, minPage - (maxPivotPages * 2 - (maxPage - minPage)));
+                    var i = minPage;
+
+                    switch (type) {
+                        case 'prev':
+                            pages.push({
+                                type: type,
+                                number: Math.max(1, currentPage - 1),
+                                active: currentPage > 1
+                            });
+                            break;
+                        case 'first':
+                            pages.push({
+                                type: type,
+                                number: 1,
+                                active: currentPage > 1
+                            });
+                            break;
+                        case 'page':
+                            while (i <= maxPage) {
+                                if ((i === minPage && i !== 2) || (i === maxPage && i !== numPages - 1)) {
+                                    pages.push({
+                                        type: 'more',
+                                        active: false
+                                    });
+                                } else {
+                                    pages.push({
+                                        type: type,
+                                        number: i,
+                                        active: currentPage !== i
+                                    });
+                                }
+                                i++;
+                            }
+                            break;
+                        case 'last':
+                            pages.push({
+                                type: type,
+                                number: numPages,
+                                active: currentPage !== numPages
+                            });
+                            break;
+                        case 'next':
+                            pages.push({
+                                type: 'next',
+                                number: Math.min(numPages, currentPage + 1),
+                                active: currentPage < numPages
+                            });
+                            break;
                     }
-                    i++;
-                }
-                pages.push({
-                    type: 'last',
-                    number: numPages,
-                    active: currentPage !== numPages
-                });
-                pages.push({
-                    type: 'next',
-                    number: Math.min(numPages, currentPage + 1),
-                    active: currentPage < numPages
-                });
+                })
             }
             return pages;
         };
@@ -436,6 +467,7 @@ app.factory('ngTableParams', ['$q', '$log', function ($q, $log) {
             defaultSort: 'desc',
             filterDelay: 750,
             counts: [10, 25, 50, 100],
+            pagesOrder: ['prev', 'first', 'page', 'last', 'next'],
             getGroups: this.getGroups,
             getData: this.getData
         };
