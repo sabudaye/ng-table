@@ -318,12 +318,12 @@ app.factory('ngTableParams', ['$q', '$log', function ($q, $log) {
             pages = [];
             numPages = Math.ceil(totalItems / pageSize);
             if (numPages > 1) {
+                maxPivotPages = Math.round((maxBlocks - 5) / 2);
+                minPage = Math.max(2, currentPage - maxPivotPages);
+                maxPage = Math.min(numPages - 1, currentPage + maxPivotPages * 2 - (currentPage - minPage));
+                minPage = Math.max(2, minPage - (maxPivotPages * 2 - (maxPage - minPage)));
+                var i = minPage;
                 pagesOrder.forEach(function (type) {
-                    maxPivotPages = Math.round((maxBlocks - 5) / 2);
-                    minPage = Math.max(2, currentPage - maxPivotPages);
-                    maxPage = Math.min(numPages - 1, currentPage + maxPivotPages * 2 - (currentPage - minPage));
-                    minPage = Math.max(2, minPage - (maxPivotPages * 2 - (maxPage - minPage)));
-                    var i = minPage;
 
                     switch (type) {
                         case 'prev':

@@ -146,6 +146,7 @@ describe('ngTableParams', function () {
             total: 0,
             defaultSort : 'desc',
             counts: [10, 25, 50, 100],
+            pagesOrder: ['prev', 'first', 'page', 'last', 'next'],
             getData: params.getData,
             getGroups: params.getGroups,
             filterDelay: 750
@@ -160,6 +161,7 @@ describe('ngTableParams', function () {
             total: 100,
             defaultSort : 'desc',
             counts: [10, 25, 50, 100],
+            pagesOrder: ['prev', 'first', 'page', 'last', 'next'],
             getData: params.getData,
             getGroups: params.getGroups,
             filterDelay: 750
